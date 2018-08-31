@@ -50,8 +50,8 @@ namespace SDC
             Decimal.TryParse(CTV_Ckey, out decCTV_Ckey);
 
             //First, set up the data for the form.
-            this.dtHeaderDesign = dataSets.dtGetFormDesignMetadata(decCTV_Ckey);
-            this.dtFormDesign = dataSets.dtGetFormDesign(decCTV_Ckey);
+            this.dtHeaderDesign = dataSets.dtGetFormDesignMetadataCCO(decCTV_Ckey);
+            this.dtFormDesign = dataSets.dtGetFormDesignCCO(decCTV_Ckey);
 
             //TODO: could use a dtFooter/Body/Footer instead: modify IFormDesignDataSets
 

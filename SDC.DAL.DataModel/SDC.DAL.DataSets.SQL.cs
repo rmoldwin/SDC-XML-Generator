@@ -252,6 +252,137 @@ WHERE     (i.ChecklistTemplateVersionCKey = @VersionCkey)
             return CreateDataTable(versionCkey, getChecklistItem);
         }
 
+        public DataTable dtGetFormDesignCCO(Decimal versionCkey)
+        {
+            #region SQL for SDC compatibility 2015_11_12
+            const string getChecklistItem = @"
+            SELECT  DISTINCT
+                        --Row metadata
+                                @VersionCkey AS ChecklistTemplateVersionCkey,
+                                i.ChecklistTemplateItemCkey, 
+                                COALESCE (i.ParentItemCKey, @VersionCkey) AS ParentItemCkey,
+                                i.ItemTypeKey,      --determines Q, A, AF, H, N
+                                HasChildren=(IIF(kids.ParentItemCKey IS NULL, 'false', 'true')),
+
+                        --Question, Answer, Section, Note
+                                i.VisibleText,      --@title for Q, A, H, N;  @text for eCC notes; Title @val in SDC
+                                i.longText,         --@alt-text in eCC, OtherText in SDC            
+                                i.ReportText,       --@reportText Text to appear on reports; uses 2 single-quotes to indicate that no text should appear in report
+                                i.Locked,           --@readOnly in SDC
+                                i.AuthorityRequired AS AuthorityRequired, --to be deprecated; now ecc ""Required eleement and @minCard=1, @mustImplement
+                                i.SortOrder,        --@sort-order, @order in SDC
+
+
+                                i.Required AS Required, --no longer used
+
+                                i.enabled,          --@enabled; allow for to load with sections that are not active until an appropriate item is selected
+                                i.visible,          --@visible
+                                i.type,             --@type; useful for note types
+                                i.styleClass,       --@styleClass in SDC; useful for sections with no borders;
+                                i.showInReport,     --@showInReport; defaults to true; set to false when items are not to show in reprot
+
+                                i.ShortName,        --@name
+                                i.popupText,        --@popupText
+                                i.ControlTip,       --@tooltip useful to avoid clutterning screeen with long notes, OtherText in SDC
+                                i.linkText,         --@linkText link to online notes?
+                                i.linkText2,        --@linkText2 link to online notes?
+                                s.Source AS AuthorityID,  --element OtherText in SDC
+
+                                CASE
+                                    WHEN COALESCE (p.ItemTypeKey, 0) IN (4, 23)
+                                    THEN 1 --Flag case when parent is QM & QS to handle list notes; 17 (QF) was removed rlm 4/2/2015
+                                    ELSE 0
+                                END AS IsParentQuestion,
+
+                        --Q, S
+                                COALESCE(i.MinRepetitions,1) AS minCard,    --@minCard if 0, the question or section is optional; map to @minCard
+                                COALESCE(i.MaxRepetitions,1) AS maxCard,    --@maxCard
+                                i.mustImplement,                            --@mustImplement
+                                i.ordered,
+
+                        --Q
+                                i.colTextDelimiter, --@colTextDelimiter; simpler way to handle multiple columns
+                                i.numCols,          --@numCols; simpler way to handle multiple columns
+                                i.storedCol,        --@storedCol; simpler way to handle multiple columns
+                                i.ComboHeaderText,  --@listHeaderText
+                                i.minSelections,    --@minSelections; special cases for multi-select questions; min val is 1
+                                i.maxSelections,    --@maxSelections; special cases for multi-select questions, may be Null
+
+                                --Q, To be deprecated
+                                i.ComboCol1 AS TextCol1,
+                                i.ComboCol2 AS TextCol2,
+                                i.ComboCol3 AS TextCol3,
+                                i.ComboCol4 AS TextCol4,
+
+                        --Lists
+
+
+
+
+                        --URI List
+
+
+                        --Injected Form
+
+
+                        --
+
+
+
+                        --QF, AF (Responses)
+                                COALESCE (LODT.DataType, '') AS DataType,    --@datatype
+                                COALESCE (i.AnswerUnits, '') AS AnswerUnits, --@answer-units
+                                i.TextAfterConcept,                          --@textAfterResponse
+                                i.DefaultValue,
+                                i.AnswerMaxChars,
+                                i.AnswerMaxDecimals,
+                                i.AnswerMinValue,
+                                i.AnswerMaxValue,
+
+
+                        --AF
+                                i.responseRequired,                          --@responseRequired; for Answer fill-ins; default to false
+
+                        --A, AF
+                                i.SelectionDisablesChildren,                                --@selectionDisablesChildren
+                                i.SelectionDisablesSiblings AS SelectionDeselectsSiblings,  --@selectionDeselectsSiblings
+                                i.omitWhenSelected                                          --@omitWhenSelected; Conditional reporting on List Items
+
+                        FROM    SSP_VersionItems_work
+                                        AS i WITH (NOLOCK)
+                                LEFT OUTER JOIN  ListOfDataTypes LODT
+                                    ON i.AnswerDataTypeKey = LODT.DataTypeKey
+                                LEFT OUTER JOIN  SSP_VersionItems_work
+                                    AS p WITH (NOLOCK)
+                                    ON i.ParentItemCKey = p.ChecklistTemplateItemCkey
+                                LEFT OUTER JOIN  ListOfSources
+                                    AS s WITH (NOLOCK)
+                                    ON i.SourceCKey = s.SourceCkey
+                                LEFT OUTER JOIN SSP_VersionItems_work AS kids ON
+                                i.[ChecklistTemplateItemCkey] = kids.ParentItemCkey
+
+
+            WHERE     (i.ChecklistTemplateVersionCKey = @VersionCkey)
+                                    AND (i.ItemTypeKey IS NOT NULL)
+                                    AND (i.SkipConcept = 0)
+                        AND i.ChecklistTemplateItemCkey NOT IN
+                        (
+                            SELECT CTI_cKey
+                            FROM dbo.DeprecatedItemsCompleteCTE
+                        )
+                        ORDER BY i.SortOrder
+";
+
+            
+            #endregion
+            return CreateDataTable(versionCkey, getChecklistItem);
+
+
+
+        }
+
+
+
         /// <summary>
         /// Gets all necessary information of a checklist template version
         /// </summary>
@@ -350,6 +481,41 @@ WHERE     (i.ChecklistTemplateVersionCKey = @VersionCkey)
 
             return CreateDataTable(versionCkey, getChecklistVersion);
         }
+
+        public DataTable dtGetFormDesignMetadataCCO(Decimal versionCkey)
+        {
+            #region SQL
+            const string getChecklistVersion = 
+            @"
+                SELECT
+                    ChecklistTemplateVersionCkey = '357.1000043' ,
+                    VisibleText = 'Lung Surgery CCO' ,
+                    ChecklistCKey  = '000' ,
+                    ShortName = 'LungSurgCCO',
+                    VersionID  = '1.0.0',
+                    AJCC_UICC_Version  = '8' ,
+                    Restrictions  = 'This template applies to lung cancer surgery',
+                    WebPostingDate  = '8/31/2018 00:00:00 AM',
+                    RevisionDate  = '8/31/2018 00:00:00 AM',
+                    EffectiveDate  = '8/31/2018 00:00:00 AM',
+                    RetireDate  = '',
+                    ApprovalStatus  = 'CTP1',
+                    [Description]  = '',
+                    Category  = 'Lung',
+                    GenericHeaderText  = 'CCO Surgical Synoptic Template',
+                    FIGO_Version  = '',
+                    --Src.Source ,
+				    ReleaseVersionSuffix  = 'DRAFT',  --UNK = unknown status
+                    OfficialName  = 'Lung Surgery CCO',
+                    CurrentFileName = '',
+                    CAP_ProtocolName = '',
+                    CAP_ProtocolVersion = ''
+            ";
+            #endregion
+
+            return CreateDataTable(versionCkey, getChecklistVersion);
+        }
+
 
         /// <summary>
         /// Gets all procedures for specified checklist template version
