@@ -6,9 +6,9 @@ namespace SDC.DAL.DataSets
     public interface IFormDesignDataSets
     {
         DataTable dtGetFormDesign(decimal versionCkey);
-        DataTable dtGetFormDesignCCO(decimal versionCkey);
+        DataTable dtGetFormDesignSSP(decimal versionCkey);
         DataTable dtGetFormDesignMetadata(decimal versionCkey);
-        DataTable dtGetFormDesignMetadataCCO(decimal versionCkey);
+        DataTable dtGetFormDesignMetadataSSP(decimal versionCkey);
 
         DataTable dtGetTemplateList(decimal versionCkey);
         //DataTable dtGetHeader(decimal versionCkey);

@@ -252,7 +252,7 @@ WHERE     (i.ChecklistTemplateVersionCKey = @VersionCkey)
             return CreateDataTable(versionCkey, getChecklistItem);
         }
 
-        public DataTable dtGetFormDesignCCO(Decimal versionCkey)
+        public DataTable dtGetFormDesignSSP(Decimal versionCkey)
         {
             #region SQL for SDC compatibility 2015_11_12
             const string getChecklistItem = @"
@@ -482,7 +482,7 @@ WHERE     (i.ChecklistTemplateVersionCKey = @VersionCkey)
             return CreateDataTable(versionCkey, getChecklistVersion);
         }
 
-        public DataTable dtGetFormDesignMetadataCCO(Decimal versionCkey)
+        public DataTable dtGetFormDesignMetadataSSP(Decimal versionCkey)
         {
             #region SQL
             const string getChecklistVersion = 
