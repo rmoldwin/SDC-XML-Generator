@@ -91,7 +91,12 @@ namespace SDC
                         break;
                     case ItemTypeEnum.ListItemFillin:
                     case ItemTypeEnum.ListItem:
-                        qi = (QuestionItemType)SDCHelpers.GetParentIETypeNode(parURI);
+                        //debug code
+                        if (SDCHelpers.GetParentIETypeNode(parURI) == null)
+                            qi=null;
+                        else
+                            qi = (QuestionItemType)SDCHelpers.GetParentIETypeNode(parURI);
+
                         li = AddFillListItemToQuestion(qi);
                         break;
                     case ItemTypeEnum.QuestionFill:
@@ -1352,6 +1357,8 @@ namespace SDC
         protected virtual ListItemType AddListItemToList(QuestionItemType qParent, Boolean fillData = true, string id = null)
         {
             var list = qParent.ListField_Item.List_Item;
+            //if (list==null)
+
             var li = new ListItemType(list, fillData, id);
             list.DisplayedItem_List.Add(li);
 

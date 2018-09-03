@@ -273,7 +273,7 @@ WHERE     (i.ChecklistTemplateVersionCKey = @VersionCkey)
                                 i.SortOrder,        --@sort-order, @order in SDC
 
 
-                                i.Required AS Required, --no longer used
+                                --i.Required AS Required, --no longer used
 
                                 i.enabled,          --@enabled; allow for to load with sections that are not active until an appropriate item is selected
                                 i.visible,          --@visible
